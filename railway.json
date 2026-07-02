@@ -1,9 +1,18 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
-  "build": {
-    "builder": "DOCKERFILE"
-  },
+  "name": "SupoClip",
   "services": {
+    "postgres": {
+      "source": "image:postgres:15",
+      "env": {
+        "POSTGRES_DB": "supoclip",
+        "POSTGRES_PASSWORD": "${{RAILWAY_DATABASE_PASSWORD}}",
+        "POSTGRES_USER": "postgres"
+      }
+    },
+    "redis": {
+      "source": "image:redis:7"
+    },
     "frontend": {
       "builder": "DOCKERFILE",
       "dockerfilePath": "./frontend/Dockerfile",
@@ -17,8 +26,8 @@
       "builder": "DOCKERFILE",
       "dockerfilePath": "./backend/Dockerfile",
       "env": {
-        "DATABASE_URL": "${{postgres.DATABASE_URL}}",
-        "REDIS_URL": "${{redis.REDIS_URL}}",
+        "DATABASE_URL": "postgresql://postgres:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/supoclip",
+        "REDIS_URL": "redis://${{redis.RAILWAY_PRIVATE_DOMAIN}}:6379",
         "BETTER_AUTH_URL": "https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}",
         "SELF_HOST": "true"
       }
@@ -28,8 +37,8 @@
       "dockerfilePath": "./backend/Dockerfile",
       "startCommand": "python -m arq worker.WorkerSettings",
       "env": {
-        "DATABASE_URL": "${{postgres.DATABASE_URL}}",
-        "REDIS_URL": "${{redis.REDIS_URL}}"
+        "DATABASE_URL": "postgresql://postgres:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/supoclip",
+        "REDIS_URL": "redis://${{redis.RAILWAY_PRIVATE_DOMAIN}}:6379"
       }
     }
   }
