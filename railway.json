@@ -1,0 +1,34 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "name": "SupoClip",
+  "services": {
+    "frontend": {
+      "builder": "DOCKERFILE",
+      "dockerfilePath": "./frontend/Dockerfile",
+      "env": {
+        "NEXT_PUBLIC_API_URL": "https://${{backend.RAILWAY_PUBLIC_DOMAIN}}",
+        "NEXT_PUBLIC_APP_URL": "https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}",
+        "NEXT_PUBLIC_SELF_HOST": "true"
+      }
+    },
+    "backend": {
+      "builder": "DOCKERFILE",
+      "dockerfilePath": "./backend/Dockerfile",
+      "env": {
+        "DATABASE_URL": "${{postgres.DATABASE_URL}}",
+        "REDIS_URL": "${{redis.REDIS_URL}}",
+        "BETTER_AUTH_URL": "https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}",
+        "SELF_HOST": "true"
+      }
+    },
+    "worker": {
+      "builder": "DOCKERFILE",
+      "dockerfilePath": "./backend/Dockerfile",
+      "startCommand": "python -m arq worker.WorkerSettings",
+      "env": {
+        "DATABASE_URL": "${{postgres.DATABASE_URL}}",
+        "REDIS_URL": "${{redis.REDIS_URL}}"
+      }
+    }
+  }
+}
